@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Licznik czasu</title>
+  <title>Globalny Licznik Czasu</title>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -16,53 +16,35 @@
       background-color: #121212;
       color: #ffffff;
     }
+    .title {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      color: #a0a0a0;
+      text-align: center;
+    }
     .timer {
       font-size: 2rem;
       font-weight: bold;
       letter-spacing: 2px;
-      margin-bottom: 20px;
-      font-mono: monospace;
-    }
-    button {
-      padding: 10px 24px;
-      font-size: 1rem;
-      font-weight: bold;
-      color: #ffffff;
-      background-color: #ff3b30;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    button:hover {
-      background-color: #d72c21;
+      font-family: monospace;
     }
   </style>
 </head>
 <body>
-<h1 class="title">Czas od ostatniego pierdolnięcia głupoty przez Angelike:</h1>
+
+ <h1 class="title">Czas od ostatniego pierdolnięcia głupoty przez Angelike:</h1>
   <div class="timer" id="timer">00 r : 00 m : 00 d : 00 g : 00 min : 00 s</div>
-  <button onclick="resetTimer()">Reset</button>
 
   <script>
-    const STORAGE_KEY = 'timer_start_time';
+    // TUTAJ USTAWIA SZ GLOBALNĄ DATĘ RESETU (Format: YYYY-MM-DDTHH:mm:ss)
+    const START_DATE = "2026-08-31T20:00:00";
 
-    // Pobierz zapisany czas lub ustaw obecny
-    function getStartTime() {
-      let startTime = localStorage.getItem(STORAGE_KEY);
-      if (!startTime) {
-        startTime = Date.now();
-        localStorage.setItem(STORAGE_KEY, startTime);
-      }
-      return parseInt(startTime, 10);
-    }
+    const startTime = new Date(START_DATE).getTime();
 
     function updateTimer() {
-      const startTime = getStartTime();
       const now = Date.now();
-      const diffInSeconds = Math.floor((now - startTime) / 1000);
+      const diffInSeconds = Math.max(0, Math.floor((now - startTime) / 1000));
 
-      // Obliczenia czasu (przyjęto średnią 30.44 dni / miesiąc oraz 365.25 dni / rok)
       const years = Math.floor(diffInSeconds / (365.25 * 24 * 3600));
       let rem = diffInSeconds % Math.floor(365.25 * 24 * 3600);
 
@@ -78,19 +60,12 @@
       const minutes = Math.floor(rem / 60);
       const seconds = rem % 60;
 
-      // Formatowanie dwucyfrowe
       const pad = (n) => String(n).padStart(2, '0');
 
       document.getElementById('timer').innerText = 
         `${pad(years)} r : ${pad(months)} m : ${pad(days)} d : ${pad(hours)} g : ${pad(minutes)} min : ${pad(seconds)} s`;
     }
 
-    function resetTimer() {
-      localStorage.setItem(STORAGE_KEY, Date.now());
-      updateTimer();
-    }
-
-    // Zapis stanu w localStorage gwarantuje, że licznik nie zeruje się po odświeżeniu strony
     setInterval(updateTimer, 1000);
     updateTimer();
   </script>
