@@ -27,23 +27,82 @@
       font-weight: bold;
       letter-spacing: 2px;
       font-family: monospace;
+      margin-bottom: 30px;
+    }
+
+    /* Style dla paska postępu */
+    .progress-container {
+      width: 80%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 16px;
+      background-color: #2a2a2a;
+      border-radius: 10px;
+      position: relative;
+      overflow: visible; /* Widoczność dla wychodzącej emotki */
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+      border-radius: 10px;
+      position: relative;
+      transition: width 0.2s ease;
+    }
+
+    .baby-head {
+      position: absolute;
+      right: -14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .percentage-text {
+      margin-top: 15px;
+      font-size: 1.2rem;
+      font-family: monospace;
+      color: #00f2fe;
     }
   </style>
 </head>
 <body>
 
- <h1 class="title">Czas od ostatniego pierdolnięcia głupoty przez Angelike:</h1>
+  <h1 class="title">Czas od ostatniego pierdolnięcia głupoty przez Angelike:</h1>
   <div class="timer" id="timer">00 r : 00 m : 00 d : 00 g : 00 min : 00 s</div>
 
+  <!-- Kontener paska postępu -->
+  <div class="progress-container">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-fill">
+        <span class="baby-head">👶</span>
+      </div>
+    </div>
+    <div class="percentage-text" id="percentage">0.000%</div>
+  </div>
+
   <script>
-    // TUTAJ USTAWIA SZ GLOBALNĄ DATĘ RESETU (Format: YYYY-MM-DDTHH:mm:ss)
-    const START_DATE = "3026-09-07T21:00:00";
+    // TUTAJ USTAWIA SZ GLOBALNĄ DATĘ RESETU (Format: YYYY-MM-DDTHH:mm:ss)//////////////////////////////////////////////////////////////////////////////////////
+    const START_DATE = "2026-09-14T21:00:00";
 
     const startTime = new Date(START_DATE).getTime();
 
+    // Długość pełnego miesiąca przyjęta w przeliczeniu (30.44 dni w ms)
+    const ONE_MONTH_MS = 30.44 * 24 * 60 * 60 * 1000;
+
     function updateTimer() {
       const now = Date.now();
-      const diffInSeconds = Math.max(0, Math.floor((now - startTime) / 1000));
+      const diffMs = Math.max(0, now - startTime);
+      const diffInSeconds = Math.floor(diffMs / 1000);
 
       const years = Math.floor(diffInSeconds / (365.25 * 24 * 3600));
       let rem = diffInSeconds % Math.floor(365.25 * 24 * 3600);
@@ -64,9 +123,19 @@
 
       document.getElementById('timer').innerText = 
         `${pad(years)} r : ${pad(months)} m : ${pad(days)} d : ${pad(hours)} g : ${pad(minutes)} min : ${pad(seconds)} s`;
+
+      // Obliczanie procentu do paska postępu (0% = 0 dni, 100% = miesiąc)
+      let percent = (diffMs / ONE_MONTH_MS) * 100;
+      
+      // Ograniczenie maksymalnego paska do 100%
+      const clampedPercent = Math.min(percent, 100);
+
+      document.getElementById('progress-fill').style.width = clampedPercent + '%';
+      document.getElementById('percentage').innerText = percent.toFixed(3) + '%';
     }
 
-    setInterval(updateTimer, 1000);
+    // Odświeżanie częściej (co 100ms), aby naliczanie procentowe było płynne
+    setInterval(updateTimer, 100);
     updateTimer();
   </script>
 </body>
